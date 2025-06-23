@@ -49,16 +49,30 @@ def login():
 #     preview_po = preview_po_number()
 #     return jsonify({"po_number": preview_po})
 
-@application.route('/api/preview_po_number', methods=['GET', 'OPTIONS'])
-def preview_po_number():
-    if request.method == 'OPTIONS':
-        return '', 200  # Handle CORS preflight
+# @application.route('/api/preview_po_number', methods=['GET', 'OPTIONS'])
+# def preview_po_number():
+#     if request.method == 'OPTIONS':
+#         return '', 200  # Handle CORS preflight
 
-    try:
-        po_number = generate_po_number()
-        return jsonify({"po_number": po_number}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#     try:
+#         po_number = generate_po_number()
+#         return jsonify({"po_number": po_number}), 200
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+##################################################################################
+@application.route("/api/preview_po_number", methods=["GET"])
+
+def preview_po_number():
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    current_po_collection = db["Current_PO_Number"]
+    # Find the latest PO number document, exclude _id
+    po_doc = current_po_collection.find_one({}, {"_id": 0})
+    if po_doc:
+        return jsonify(po_doc)  # Returns: {"po_number": "PO-250623-0004"}
+    else:
+        return jsonify({"message": "No PO number available"}), 404
 
 
 ###################################################################################################################################
