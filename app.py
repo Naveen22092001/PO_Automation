@@ -44,10 +44,20 @@ def login():
 
 ##################################################################################################################################
 
-@application.route('/api/preview_po_number', methods=['GET'])
+# @application.route('/api/preview_po_number', methods=['GET'])
+# def preview_po_number():
+#     preview_po = preview_po_number()
+#     return jsonify({"po_number": preview_po})
+
+@application.route('/api/preview_po_number', methods=['GET', 'OPTIONS'])
 def preview_po_number():
-    preview_po = preview_po_number()
-    return jsonify({"po_number": preview_po})
+    if request.method == 'OPTIONS':
+        # This handles the CORS preflight request
+        return '', 200
+
+    # Your actual GET logic here:
+    return jsonify({"po_number": "PO-1234"})  # example response
+
 
 ###################################################################################################################################
 
