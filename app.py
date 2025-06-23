@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
-from users import employee_login
+from users import employee_login, submit_po
 import logging
 application = Flask(__name__)
 CORS(application)
@@ -11,12 +11,16 @@ CORS(application)
 @application.route("/")
 def home():
     return jsonify({"message": "Backend is running successfully!"})
+
+
 ###########################################################################
 # Route to fetch all available API routes
 @application.route("/api/routes", methods=["GET"])
 def get_routes():
     return jsonify([str(rule) for rule in application.url_map.iter_rules()])
 logging.basicConfig(level=logging.DEBUG)
+
+
 #############################################################################################
 #API Endpoint for the login post request 
 @application.route("/api/login", methods=["POST"])
@@ -38,4 +42,17 @@ def login():
     else:
         return jsonify({"error": "Invalid username or password"}), 401
 
-##############################################################################
+##################################################################################################################################
+
+@application.route('/api/preview_po_number', methods=['POST'])
+def preview_po_number():
+    preview_po = preview_po_number()
+    return jsonify({"po_number": preview_po})
+
+###################################################################################################################################
+
+@application.route('/api/submit_po', methods=['POST'])
+def call_submit_po():
+    return submit_po()
+
+####################################################################################################################################
