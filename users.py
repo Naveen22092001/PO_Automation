@@ -3,23 +3,23 @@
 # from flask import jsonify, request
 # from pymongo import MongoClient, ReturnDocument
 
-# def employee_login(emp_name, emp_password):
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     collection = db["Employee_credentials"]
-#     user = collection.find_one({"Username": emp_name})
-#     if not user:
-#         return None
+def employee_login(emp_name, emp_password):
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    collection = db["Employee_credentials"]
+    user = collection.find_one({"Username": emp_name})
+    if not user:
+        return None
 
-#     username = user["Username"]
-#     password = user["Password"]
-#     if username == emp_name and password == emp_password:
-#         if username == "admin":
-#             return {"Username": username, "message": "Admin login successful"}
-#         else:
-#             return {"Username": username, "message": "Login successful"}
-#     else:
-#         return None
+    username = user["Username"]
+    password = user["Password"]
+    if username == emp_name and password == emp_password:
+        if username == "admin":
+            return {"Username": username, "message": "Admin login successful"}
+        else:
+            return {"Username": username, "message": "Login successful"}
+    else:
+        return None
     
 
 # def generate_po_number():
