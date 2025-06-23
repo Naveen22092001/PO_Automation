@@ -33,4 +33,12 @@ def login():
 
     user_data = employee_login(username, password)
 
+    if user_data:
+        if username =="admin":
+            return jsonify({"user": user_data, "message": "Admin login successful"}), 200
+        else:
+            return jsonify({"user": user_data, "message": "Login successful"}), 200
+    else:
+        return jsonify({"error": "Invalid username or password"}), 401
+
 ##############################################################################

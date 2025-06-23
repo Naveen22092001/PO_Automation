@@ -45,3 +45,6 @@ def generate_po_number():
     po_number = f"PO-{full_date}-{new_count:04d}" 
 
     return jsonify({"po_number": po_number})
+
+
+generate_po_number()
