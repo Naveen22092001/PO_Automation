@@ -2,11 +2,13 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
-from users import employee_login, generate_po_number, submit_po
+from users import employee_login, generate_po_number, save_po_document, submit_po
 import logging
 application = Flask(__name__)
 CORS(application)
-
+client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+db = client["Timesheet"]
+current_po_collection = db["Current_PO_Number"]
 
 @application.route("/")
 def home():
@@ -61,27 +63,50 @@ def login():
 #         return jsonify({"error": str(e)}), 500
 
 ##################################################################################
-@application.route("/api/preview_po_number", methods=["GET"])
+# @application.route("/api/preview_po_number", methods=["GET"])
 
-def preview_po_number():
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
-    current_po_collection = db["Current_PO_Number"]
-    # Find the latest PO number document, exclude _id
-    try:
-        # Try to get the latest PO number document (no _id)
-        po_doc = current_po_collection.find_one({}, {"_id": 0})
-        if po_doc and "po_number" in po_doc:
-            return jsonify({"po_number": po_doc["po_number"]})
-        else:
-            return jsonify({"error": "Unable to generate PO number"}), 404
-    except Exception as e:
-        return jsonify({"error": "Unable to generate PO number"}), 500
+# def preview_po_number():
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     current_po_collection = db["Current_PO_Number"]
+#     # Find the latest PO number document, exclude _id
+#     try:
+#         # Try to get the latest PO number document (no _id)
+#         po_doc = current_po_collection.find_one({}, {"_id": 0})
+#         if po_doc and "po_number" in po_doc:
+#             return jsonify({"po_number": po_doc["po_number"]})
+#         else:
+#             return jsonify({"error": "Unable to generate PO number"}), 404
+#     except Exception as e:
+#         return jsonify({"error": "Unable to generate PO number"}), 500
 
-###################################################################################################################################
+# ###################################################################################################################################
 
-@application.route('/api/submit_po', methods=['POST'])
-def call_submit_po():
-    return submit_po()
+# @application.route('/api/submit_po', methods=['POST'])
+# def call_submit_po():
+#     return submit_po()
 
 ####################################################################################################################################
+
+@application.route("/api/preview_po_number", methods=["GET"])
+def preview_po_number():
+    po_doc = current_po_collection.find_one()
+    if po_doc and "po_number" in po_doc:
+        return jsonify({"po_number": po_doc["po_number"]})
+    else:
+        return jsonify({"error": "Unable to generate PO number"}), 404
+
+
+@application.route("/api/submit_po", methods=["POST"])
+def submit_po():
+    try:
+        data = request.json
+        po_number = generate_po_number()
+        save_po_document(data, po_number)
+
+        return jsonify({
+            "message": "PO submitted successfully",
+            "po_number": po_number
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
