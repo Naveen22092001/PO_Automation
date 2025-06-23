@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
-from users import employee_login, generate_po_number, save_po_document, submit_po
+from users import employee_login, generate_po_number, save_po_document
 import logging
 application = Flask(__name__)
 CORS(application)
