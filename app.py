@@ -68,12 +68,15 @@ def preview_po_number():
     db = client["Timesheet"]
     current_po_collection = db["Current_PO_Number"]
     # Find the latest PO number document, exclude _id
-    po_doc = current_po_collection.find_one({}, {"_id": 0})
-    if po_doc:
-        return jsonify(po_doc)  # Returns: {"po_number": "PO-250623-0004"}
-    else:
-        return jsonify({"message": "No PO number available"}), 404
-
+    try:
+        # Try to get the latest PO number document (no _id)
+        po_doc = current_po_collection.find_one({}, {"_id": 0})
+        if po_doc and "po_number" in po_doc:
+            return jsonify({"po_number": po_doc["po_number"]})
+        else:
+            return jsonify({"error": "Unable to generate PO number"}), 404
+    except Exception as e:
+        return jsonify({"error": "Unable to generate PO number"}), 500
 
 ###################################################################################################################################
 
