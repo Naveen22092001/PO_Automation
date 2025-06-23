@@ -47,4 +47,3 @@ def generate_po_number():
     return jsonify({"po_number": po_number})
 
 
-generate_po_number()
