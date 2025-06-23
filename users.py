@@ -44,7 +44,7 @@ def generate_po_number():
     # Generate PO number with 4-digit padding
     po_number = f"PO-{full_date}-{new_count:04d}" 
 
-    return jsonify({"po_number": po_number})
+    return ({"po_number": po_number})
     # print(po_number)
 
 
