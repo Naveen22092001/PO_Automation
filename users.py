@@ -22,45 +22,30 @@ def employee_login(emp_name, emp_password):
         return None
     
 
-# def generate_po_number():
-#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-#     db = client["Timesheet"]
-#     po_counter_collection = db["monthly_po_tracker"]
-#     po_data_collection = db["Purchase_Orders"]
-#     today = datetime.now()
-#     full_date = today.strftime("%y%m%d")  # e.g., 250619
-#     month_key = today.strftime("%y%m")    # e.g., 2506
-
-#     # Get current month's record
-#     record = po_counter_collection.find_one({"month": month_key})
-
-#     if record:
-#         new_count = record["count"] + 1
-#         po_counter_collection.update_one({"month": month_key}, {"$set": {"count": new_count}})
-#     else:
-#         new_count = 1
-#         po_counter_collection.insert_one({"month": month_key, "count": new_count})
-
-#     # Generate PO number with 4-digit padding
-#     po_number = f"PO-{full_date}-{new_count:04d}" 
-
-#     return jsonify({"po_number": po_number})
-
-def preview_po_number():
+def generate_po_number():
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
     db = client["Timesheet"]
     po_counter_collection = db["monthly_po_tracker"]
     po_data_collection = db["Purchase_Orders"]
     today = datetime.now()
-    full_date = today.strftime("%y%m%d")  # e.g. 250619
-    month_key = today.strftime("%y%m")    # e.g. 2506
+    full_date = today.strftime("%y%m%d")  # e.g., 250619
+    month_key = today.strftime("%y%m")    # e.g., 2506
 
-    # Get current count (without incrementing it)
+    # Get current month's record
     record = po_counter_collection.find_one({"month": month_key})
-    next_count = (record["count"] + 1) if record else 1
-    preview_po = f"PO-{full_date}-{next_count:04d}"
 
-    return jsonify({"po_number": preview_po})
+    if record:
+        new_count = record["count"] + 1
+        po_counter_collection.update_one({"month": month_key}, {"$set": {"count": new_count}})
+    else:
+        new_count = 1
+        po_counter_collection.insert_one({"month": month_key, "count": new_count})
+
+    # Generate PO number with 4-digit padding
+    po_number = f"PO-{full_date}-{new_count:04d}" 
+
+    return jsonify({"po_number": po_number})
+
 
 
 def submit_po():

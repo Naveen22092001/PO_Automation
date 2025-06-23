@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
-from users import employee_login, submit_po
+from users import employee_login, generate_po_number, submit_po
 import logging
 application = Flask(__name__)
 CORS(application)
@@ -52,11 +52,13 @@ def login():
 @application.route('/api/preview_po_number', methods=['GET', 'OPTIONS'])
 def preview_po_number():
     if request.method == 'OPTIONS':
-        # This handles the CORS preflight request
-        return '', 200
+        return '', 200  # Handle CORS preflight
 
-    # Your actual GET logic here:
-    return jsonify({"po_number": "PO-1234"})  # example response
+    try:
+        po_number = generate_po_number()
+        return jsonify({"po_number": po_number}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 ###################################################################################################################################
