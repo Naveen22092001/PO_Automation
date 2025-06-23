@@ -44,7 +44,7 @@ def login():
 
 ##################################################################################################################################
 
-@application.route('/api/preview_po_number', methods=['GET'])
+@application.route('/api/po_number', methods=['GET'])
 def preview_po_number():
     preview_po = preview_po_number()
     return jsonify({"po_number": preview_po})
