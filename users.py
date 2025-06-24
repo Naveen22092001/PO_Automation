@@ -146,4 +146,25 @@ def save_po_document(data, po_number):
         "submission_date": today.strftime("%Y-%m-%d"),
     }
 
-    po_data_collection.insert_one(po_data)
+    po_data_collection.insert_one(po_data)             
+
+
+def get_po_details_by_number(po_number):
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    po_data_collection = db["Purchase_Orders"]
+    return po_data_collection.find_one({"po_number": po_number}, {"_id": 0})
+
+def update_po_by_number(po_number, update_data):
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    po_data_collection = db["Purchase_Orders"]
+    result = po_data_collection.update_one({"po_number": po_number}, {"$set": update_data})
+    return result.modified_count > 0
+
+def delete_po_by_number(po_number):
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    po_data_collection = db["Purchase_Orders"]
+    result = po_data_collection.delete_one({"po_number": po_number})
+    return result.deleted_count > 0

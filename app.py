@@ -88,25 +88,61 @@ def login():
 
 ####################################################################################################################################
 
+# @application.route("/api/preview_po_number", methods=["GET"])
+# def preview_po_number():
+#     po_doc = current_po_collection.find_one()
+#     if po_doc and "po_number" in po_doc:
+#         return jsonify({"po_number": po_doc["po_number"]})
+#     else:
+#         return jsonify({"error": "Unable to generate PO number"}), 404
+
+
+# @application.route("/api/submit_po", methods=["POST"])
+# def submit_po():
+#     try:
+#         data = request.json
+#         po_number = generate_po_number()
+#         save_po_document(data, po_number)
+
+#         return jsonify({
+#             "message": "PO submitted successfully",
+#             "po_number": po_number
+#         })
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+
+
+
 @application.route("/api/preview_po_number", methods=["GET"])
 def preview_po_number():
     po_doc = current_po_collection.find_one()
     if po_doc and "po_number" in po_doc:
         return jsonify({"po_number": po_doc["po_number"]})
     else:
-        return jsonify({"error": "Unable to generate PO number"}), 404
+        try:
+            new_po = generate_po_number()
+            return jsonify({"po_number": new_po})
+        except Exception as e:
+            return jsonify({"error": "Unable to generate PO number"}), 500
 
 
 @application.route("/api/submit_po", methods=["POST"])
 def submit_po():
-    try:
-        data = request.json
-        po_number = generate_po_number()
-        save_po_document(data, po_number)
+    data = request.json
 
-        return jsonify({
-            "message": "PO submitted successfully",
-            "po_number": po_number
-        })
+    # Get the currently generated PO number
+    po_doc = current_po_collection.find_one()
+    if not po_doc or "po_number" not in po_doc:
+        return jsonify({"error": "No PO number available"}), 400
+
+    current_po = po_doc["po_number"]
+
+    # Save the PO document
+    try:
+        save_po_document(data, current_po)
+        # Generate the next PO number for future preview
+        generate_po_number()
+        return jsonify({"message": "PO submitted successfully", "po_number": current_po})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Failed to submit PO"}), 500
