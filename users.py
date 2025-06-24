@@ -108,12 +108,84 @@ po_data_collection = db["Purchase_Orders"]
 current_po_collection = db["Current_PO_Number"]
 
 
-def generate_po_number():
-    today = datetime.now()
-    full_date = today.strftime("%y%m%d")  # e.g., 250619
-    month_key = today.strftime("%y%m")    # e.g., 2506
+# def generate_po_number():
+#     today = datetime.now()
+#     full_date = today.strftime("%y%m%d")  # e.g., 250619
+#     month_key = today.strftime("%y%m")    # e.g., 2506
 
-    # Get or create the counter for the current month
+#     # Get or create the counter for the current month
+#     counter = po_counter_collection.find_one_and_update(
+#         {"month": month_key},
+#         {"$inc": {"count": 1}},
+#         upsert=True,
+#         return_document=ReturnDocument.AFTER
+#     )
+
+#     new_count = counter["count"]
+#     po_number = f"PO-{full_date}-{new_count:04d}"
+
+#     # Save/update the latest PO number in separate collection
+#     current_po_collection.replace_one({}, {"po_number": po_number}, upsert=True)
+
+#     return po_number
+
+
+# def save_po_document(data, po_number):
+#     today = datetime.now()
+
+#     po_data = {
+#         "po_number": po_number,
+#         "date": data.get("date"),
+#         "quote_number": data.get("quote_number"),
+#         "vendor_details": data.get("vendor_details"),
+#         "delivery_address": data.get("delivery_address"),
+#         "items": data.get("items"),
+#         "grand_total": data.get("grand_total"),
+#         "payment_terms": data.get("payment_terms"),
+#         "invoice_email": data.get("invoice_email"),
+#         "submission_date": today.strftime("%Y-%m-%d"),
+#     }
+
+#     po_data_collection.insert_one(po_data)             
+
+
+# def get_po_details_by_number(po_number):
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     po_data_collection = db["Purchase_Orders"]
+#     return po_data_collection.find_one({"po_number": po_number}, {"_id": 0})
+
+# def update_po_by_number(po_number, update_data):
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     po_data_collection = db["Purchase_Orders"]
+#     result = po_data_collection.update_one({"po_number": po_number}, {"$set": update_data})
+#     return result.modified_count > 0
+
+# def delete_po_by_number(po_number):
+#     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+#     db = client["Timesheet"]
+#     po_data_collection = db["Purchase_Orders"]
+#     result = po_data_collection.delete_one({"po_number": po_number})
+#     return result.deleted_count > 0
+
+
+def get_preview_po_number():
+    today = datetime.now()
+    full_date = today.strftime("%y%m%d")
+    month_key = today.strftime("%y%m")
+
+    record = po_counter_collection.find_one({"month": month_key})
+    preview_count = (record["count"] + 1) if record else 1
+    po_number = f"PO-{full_date}-{preview_count:04d}"
+    return po_number
+
+def generate_and_save_po_number(data):
+    today = datetime.now()
+    full_date = today.strftime("%y%m%d")
+    month_key = today.strftime("%y%m")
+
+    # Atomically increment the counter
     counter = po_counter_collection.find_one_and_update(
         {"month": month_key},
         {"$inc": {"count": 1}},
@@ -124,15 +196,10 @@ def generate_po_number():
     new_count = counter["count"]
     po_number = f"PO-{full_date}-{new_count:04d}"
 
-    # Save/update the latest PO number in separate collection
+    # Save the new current PO number
     current_po_collection.replace_one({}, {"po_number": po_number}, upsert=True)
 
-    return po_number
-
-
-def save_po_document(data, po_number):
-    today = datetime.now()
-
+    # Prepare PO data
     po_data = {
         "po_number": po_number,
         "date": data.get("date"),
@@ -146,25 +213,5 @@ def save_po_document(data, po_number):
         "submission_date": today.strftime("%Y-%m-%d"),
     }
 
-    po_data_collection.insert_one(po_data)             
-
-
-def get_po_details_by_number(po_number):
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
-    po_data_collection = db["Purchase_Orders"]
-    return po_data_collection.find_one({"po_number": po_number}, {"_id": 0})
-
-def update_po_by_number(po_number, update_data):
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
-    po_data_collection = db["Purchase_Orders"]
-    result = po_data_collection.update_one({"po_number": po_number}, {"$set": update_data})
-    return result.modified_count > 0
-
-def delete_po_by_number(po_number):
-    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
-    db = client["Timesheet"]
-    po_data_collection = db["Purchase_Orders"]
-    result = po_data_collection.delete_one({"po_number": po_number})
-    return result.deleted_count > 0
+    po_data_collection.insert_one(po_data)
+    return po_number

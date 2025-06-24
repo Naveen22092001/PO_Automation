@@ -2,7 +2,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
 from flask_cors import CORS
-from users import employee_login, generate_po_number, save_po_document
+from users import employee_login, generate_and_save_po_number, get_preview_po_number
 import logging
 application = Flask(__name__)
 CORS(application)
@@ -112,37 +112,55 @@ def login():
 #         return jsonify({"error": str(e)}), 500
 
 
+############################################################################################################################
+
+# @application.route("/api/preview_po_number", methods=["GET"])
+# def preview_po_number():
+#     po_doc = current_po_collection.find_one()
+#     if po_doc and "po_number" in po_doc:
+#         return jsonify({"po_number": po_doc["po_number"]})
+#     else:
+#         try:
+#             new_po = generate_po_number()
+#             return jsonify({"po_number": new_po})
+#         except Exception as e:
+#             return jsonify({"error": "Unable to generate PO number"}), 500
 
 
+# @application.route("/api/submit_po", methods=["POST"])
+# def submit_po():
+#     data = request.json
+
+#     # Get the currently generated PO number
+#     po_doc = current_po_collection.find_one()
+#     if not po_doc or "po_number" not in po_doc:
+#         return jsonify({"error": "No PO number available"}), 400
+
+#     current_po = po_doc["po_number"]
+
+#     # Save the PO document
+#     try:
+#         save_po_document(data, current_po)
+#         # Generate the next PO number for future preview
+#         generate_po_number()
+#         return jsonify({"message": "PO submitted successfully", "po_number": current_po})
+#     except Exception as e:
+#         return jsonify({"error": "Failed to submit PO"}), 500
+
+###################################################################################################################################
 @application.route("/api/preview_po_number", methods=["GET"])
 def preview_po_number():
-    po_doc = current_po_collection.find_one()
-    if po_doc and "po_number" in po_doc:
-        return jsonify({"po_number": po_doc["po_number"]})
-    else:
-        try:
-            new_po = generate_po_number()
-            return jsonify({"po_number": new_po})
-        except Exception as e:
-            return jsonify({"error": "Unable to generate PO number"}), 500
-
+    try:
+        po_number = get_preview_po_number()
+        return jsonify({"po_number": po_number})
+    except Exception as e:
+        return jsonify({"error": "Unable to generate PO number"}), 500
 
 @application.route("/api/submit_po", methods=["POST"])
 def submit_po():
-    data = request.json
-
-    # Get the currently generated PO number
-    po_doc = current_po_collection.find_one()
-    if not po_doc or "po_number" not in po_doc:
-        return jsonify({"error": "No PO number available"}), 400
-
-    current_po = po_doc["po_number"]
-
-    # Save the PO document
     try:
-        save_po_document(data, current_po)
-        # Generate the next PO number for future preview
-        generate_po_number()
-        return jsonify({"message": "PO submitted successfully", "po_number": current_po})
+        data = request.json
+        po_number = generate_and_save_po_number(data)
+        return jsonify({"message": "PO submitted successfully", "po_number": po_number})
     except Exception as e:
-        return jsonify({"error": "Failed to submit PO"}), 500
+        return jsonify({"error": "PO submission failed"}), 500
