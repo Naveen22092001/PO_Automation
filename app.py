@@ -156,6 +156,7 @@ def preview_po_number():
     except Exception as e:
         return jsonify({"error": "Unable to generate PO number"}), 500
 
+########################################################################################################################################
 @application.route("/api/submit_po", methods=["POST"])
 def submit_po():
     try:
@@ -165,6 +166,7 @@ def submit_po():
     except Exception as e:
         return jsonify({"error": "PO submission failed"}), 500
 
+###########################################################################################################################################
 @application.route("/api/po/lookup/<po_number>", methods=["GET"])
 def lookup_po(po_number):
     client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
@@ -182,3 +184,21 @@ def lookup_po(po_number):
             return jsonify({"error": f"PO number '{po_number}' not found"}), 404
     except Exception as e:
         return jsonify({"error": f"Internal Server Error: {str(e)}"}), 500
+    
+#############################################################################################################################################
+@application.route("/api/po/view/<po_number>", methods=["GET"])
+def view_po(po_number):
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    po_counter_collection = db["monthly_po_tracker"]
+    po_data_collection = db["Purchase_Orders"]
+    current_po_collection = db["Current_PO_Number"]
+    try:
+        po_doc = po_data_collection.find_one({"po_number": po_number})
+        if po_doc:
+            po_doc.pop("_id", None)  # Remove MongoDB internal ID
+            return jsonify(po_doc), 200
+        else:
+            return jsonify({"error": f"PO number '{po_number}' not found"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
