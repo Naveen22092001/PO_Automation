@@ -202,3 +202,45 @@ def view_po(po_number):
             return jsonify({"error": f"PO number '{po_number}' not found"}), 404
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
+##############################################################################################################################################
+@application.route("/api/po/edit/<po_number>", methods=["PUT"])
+def edit_po(po_number):
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    po_data_collection = db["Purchase_Orders"]
+
+    try:
+        data = request.json
+        result = po_data_collection.find_one_and_update(
+            {"po_number": po_number},
+            {"$set": data},
+            return_document=True
+        )
+
+        if result:
+            result.pop("_id", None)
+            return jsonify({"message": "PO updated successfully", "po_data": result}), 200
+        else:
+            return jsonify({"error": f"PO number '{po_number}' not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+##################################################################################################################################################
+@application.route("/api/po/delete/<po_number>", methods=["DELETE"])
+def delete_po(po_number):
+    client = MongoClient("mongodb+srv://timesheetsystem:SinghAutomation2025@cluster0.alcdn.mongodb.net/")
+    db = client["Timesheet"]
+    po_data_collection = db["Purchase_Orders"]
+
+    try:
+        result = po_data_collection.delete_one({"po_number": po_number})
+
+        if result.deleted_count == 1:
+            return jsonify({"message": f"PO '{po_number}' deleted successfully"}), 200
+        else:
+            return jsonify({"error": f"PO number '{po_number}' not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+###################################################################################################################################################
+
