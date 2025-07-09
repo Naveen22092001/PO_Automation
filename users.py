@@ -200,13 +200,27 @@ def generate_and_save_po_number(data):
     current_po_collection.replace_one({}, {"po_number": po_number}, upsert=True)
 
     # Prepare PO data
+    # po_data = {
+    #     "po_number": po_number,
+    #     "date": data.get("date"),
+    #     "quote_number": data.get("quote_number"),
+    #     "vendor_details": data.get("vendor_details"),
+    #     "delivery_address": data.get("delivery_address"),
+    #     "items": data.get("items"),
+    #     "grand_total": data.get("grand_total"),
+    #     "payment_terms": data.get("payment_terms"),
+    #     "invoice_email": data.get("invoice_email"),
+    #     "submission_date": today.strftime("%Y-%m-%d"),
+    # }
     po_data = {
         "po_number": po_number,
         "date": data.get("date"),
         "quote_number": data.get("quote_number"),
+        "project_name": data.get("project_name"),
         "vendor_details": data.get("vendor_details"),
         "delivery_address": data.get("delivery_address"),
         "items": data.get("items"),
+        "extra_charges": data.get("extra_charges"),  
         "grand_total": data.get("grand_total"),
         "payment_terms": data.get("payment_terms"),
         "invoice_email": data.get("invoice_email"),
